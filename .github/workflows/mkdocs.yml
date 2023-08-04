@@ -27,20 +27,24 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v3
       - name: debug
-        run: ls -la
+        run: |
+          ls -la
+          cat ./mkdocs.yml
 
       - name: Generate docs
         uses: mhausenblas/mkdocs-deploy-gh-pages@1.26
         env:
-          CONFIG_FILE: mkdocs.yml
-          REQUIREMENTS: requirements.txt
+          CONFIG_FILE: ./mkdocs.yml
+          REQUIREMENTS: ./requirements.txt
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           path: './site'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2
