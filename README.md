@@ -29,3 +29,19 @@ op run -- terraform apply -auto-approve
 ```
 
 This does a terraform apply with the state generated locally.  `op run` is the 1password cli client which exposes a few environment variables used for authentication of the providers.  This is currently using cloudflare as the DNS provider and my personal TLD, `jmoney.dev`.  You will need to update the `main.tf` file to use your own DNS provider and TLD.
+
+### Providers used
+
+* [Cloudflare](https://registry.terraform.io/providers/cloudflare/cloudflare/4.11.0/docs)
+* [Fastly](https://registry.terraform.io/providers/fastly/fastly/5.2.2/docs)
+
+## Test
+
+Once deployed you can run the following test to see this in action:
+
+```bash
+curl --silent "https://ws.jmoney.dev"
+websocat "wss://ws.jmoney.dev"
+```
+
+After the first command you'll see an echoed response as well as some logging in the echo-server terminal tab.  After the second command, you'll need to type some text and hit enter and then you'll see the an echoed response as well as some logging in the echo-server terminal tab.  This shows that the websocket connection is being upgraded and the websocket server is receiving the message.

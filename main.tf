@@ -6,7 +6,7 @@ terraform {
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
-      version = "4.0"
+      version = "4.11.0"
     }
   }
 }
@@ -98,7 +98,7 @@ backend {
 
 resource "cloudflare_record" "websocket" {
   zone_id = data.cloudflare_zone.tld.id
-  name    = "ws-poc"
+  name    = "ws"
   value   = "d.sni.global.fastly.net"
   type    = "CNAME"
 }
