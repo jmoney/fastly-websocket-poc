@@ -28,7 +28,7 @@ terraform init
 op run -- terraform apply -auto-approve
 ```
 
-This does a terraform apply with the state generated locally.  `op run` is the 1password cli client which exposes a few environment variables used for authentication of the providers.  This is currently using cloudflare as the DNS provider and my personal TLD, `jmoney.dev`.  You will need to update the `main.tf` file to use your own DNS provider and TLD.
+This does a terraform apply with the state generated locally.  `op run` is the 1password cli client which exposes a few environment variables used for authentication of the providers.  This is currently using cloudflare as the DNS provider and my personal TLD, `jmoney.dev`.  You will need to update the `main.tf` file to use your own DNS provider and TLD or remove entirely and manage your DNS outside the script.
 
 ### Providers used
 
