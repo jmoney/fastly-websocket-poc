@@ -25,11 +25,11 @@ data "cloudflare_zone" "tld" {
   name = local.tld
 }
 
-resource "fastly_service_vcl" "websocket" {
+resource "fastly_service_vcl" "echo" {
   name = "fastly-websocket-demo"
 
   domain {
-    name    = cloudflare_record.websocket.hostname
+    name    = cloudflare_record.echo.hostname
   }
 
   condition {
@@ -96,9 +96,9 @@ backend {
   force_destroy = true
 }
 
-resource "cloudflare_record" "websocket" {
+resource "cloudflare_record" "echo" {
   zone_id = data.cloudflare_zone.tld.id
-  name    = "ws"
+  name    = "echo"
   value   = "d.sni.global.fastly.net"
   type    = "CNAME"
 }

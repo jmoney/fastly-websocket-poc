@@ -40,8 +40,8 @@ This does a terraform apply with the state generated locally.  `op run` is the 1
 Once deployed you can run the following test to see this in action:
 
 ```bash
-curl --silent "https://ws.jmoney.dev"
-websocat "wss://ws.jmoney.dev"
+curl --silent "https://echo.jmoney.dev"
+websocat "wss://echo.jmoney.dev"
 ```
 
 After the first command you'll see an echoed response as well as some logging in the echo-server terminal tab.  After the second command, you'll need to type some text and hit enter and then you'll see the an echoed response as well as some logging in the echo-server terminal tab.  This shows that the websocket connection is being upgraded and the websocket server is receiving the message.
