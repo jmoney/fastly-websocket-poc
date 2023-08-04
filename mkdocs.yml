@@ -2,3 +2,4 @@ site_name: Fastly Websocket POC
 theme: material
 plugins:
   - macros
+docs_dir: docs
