@@ -2,11 +2,29 @@
 
 ## Deploy
 
-To start run `ngrok start --all --config ngrok.yml`. This will start ngrok and expose `localhost:9001` and `localhost:9002` to the internet.  Then you need to update the local variables in `main.tf` to the outputted ngrok urls.
+First run the following commands
+
+```bash
+brew bundle --file Brewfile
+ngrok start --all --config ngrok.yml
+```
+
+This will start ngrok and expose `localhost:9001` and `localhost:9002` to the internet.  Then you need to update the local variables in `main.tf` to the outputted ngrok urls.
+
+Now in two separate tabs of your terminal run the following commands:
+
+```bash
+echo-server --port 9001 --type http
+echo-server --port 9002 --type websocket
+```
+
+This starts two echo servers on addresses `localhost:9001` and `localhost:9002`.  The first is a simple http server that returns the request headers.  The second is a websocket server that echos back the message sent to it.
 
 The fastly service is deployed using terraform. The terraform script is `main.tf`. To deploy the service, run the following commands:
 
 ```bash
+tfenv use
+terraform init
 op run -- terraform apply -auto-approve
 ```
 
