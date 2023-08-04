@@ -26,7 +26,7 @@ data "cloudflare_zone" "tld" {
 }
 
 resource "fastly_service_vcl" "echo" {
-  name = "fastly-websocket-demo"
+  name = "fastly-websocket-poc"
 
   domain {
     name    = cloudflare_record.echo.hostname
