@@ -1,2 +1,2 @@
-mkdocs-macros-plugin
+mkdocs-include-markdown-plugin
 material

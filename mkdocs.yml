@@ -1,5 +1,5 @@
 site_name: Fastly Websocket POC
 theme: material
 plugins:
-  - macros
+  - include-markdown
 docs_dir: docs

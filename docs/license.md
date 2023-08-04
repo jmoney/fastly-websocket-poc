@@ -1,5 +1,5 @@
 # License
 
 ```text
-{% include '../LICENSE' %}
+{% include-markdown '../LICENSE' %}
 ```
