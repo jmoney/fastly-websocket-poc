@@ -3,5 +3,5 @@ theme: material
 plugins:
   - include-markdown
   - macros:
-    include_dir: ./
+      include_dir: ./
 docs_dir: docs
