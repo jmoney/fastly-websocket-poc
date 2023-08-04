@@ -6,15 +6,30 @@ terraform {
     }
     cloudflare = {
       source  = "cloudflare/cloudflare"
+      version = "4.0"
     }
   }
+}
+
+provider "cloudflare" {}
+
+provider  "fastly" {}
+
+locals {
+  websocket_backend_addr = "https://b31a-70-121-110-22.ngrok-free.app"
+  nonwebsocket_backend_addr = "https://34b1-70-121-110-22.ngrok-free.app"
+  tld = "jmoney.dev"
+}
+
+data "cloudflare_zone" "tld" {
+  name = local.tld
 }
 
 resource "fastly_service_vcl" "websocket" {
   name = "fastly-websocket-demo"
 
   domain {
-    name    = "ws-poc.jmoney.dev"
+    name    = cloudflare_record.websocket.hostname
   }
 
   condition {
@@ -47,26 +62,27 @@ resource "fastly_service_vcl" "websocket" {
 
   backend {
     name = "ws_backend"
-    address = "https://b31a-70-121-110-22.ngrok-free.app"
+    address = local.websocket_backend_addr
     request_condition = "websocket"
     ssl_check_cert = false
     port = 443
     use_ssl = true
-    ssl_sni_hostname = "b31a-70-121-110-22.ngrok-free.app"
-    override_host = "b31a-70-121-110-22.ngrok-free.app"
+    ssl_sni_hostname = trimprefix(local.websocket_backend_addr, "https://")
+    override_host = trimprefix(local.websocket_backend_addr, "https://")
   }
 
 backend {
     name = "non_ws_backend"
-    address = "https://34b1-70-121-110-22.ngrok-free.app"
+    address = local.nonwebsocket_backend_addr
     request_condition = "not_websocket"
     ssl_check_cert = false
     port = 443
     use_ssl = true
-    ssl_sni_hostname = "34b1-70-121-110-22.ngrok-free.app"
-    override_host = "34b1-70-121-110-22.ngrok-free.app"
+    ssl_sni_hostname = trimprefix(local.nonwebsocket_backend_addr, "https://")
+    override_host = trimprefix(local.nonwebsocket_backend_addr, "https://")
   }
 
+  # This enables the websocket product feature as a trial. Need to contact support to enable it permanently on paid accounts
   product_enablement {
     websockets = true
   }
@@ -80,9 +96,9 @@ backend {
   force_destroy = true
 }
 
-resource "cloudflare_record" "example" {
-  zone_id = var.cloudflare_zone_id
-  name    = "ws-poc.jmoney.dev"
-  value   = "192.0.2.1"
-  type    = "d.sni.global.fastly.net"
+resource "cloudflare_record" "websocket" {
+  zone_id = data.cloudflare_zone.tld.id
+  name    = "ws-poc"
+  value   = "d.sni.global.fastly.net"
+  type    = "CNAME"
 }

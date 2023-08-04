@@ -1,0 +1,8 @@
+version: "2"
+tunnels:
+  request:
+    addr: 9001
+    proto: http
+  websocket:
+    addr: 9002
+    proto: http
