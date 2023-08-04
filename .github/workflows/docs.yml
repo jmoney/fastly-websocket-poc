@@ -2,11 +2,10 @@ name: Publish mkdocs via GitHub Pages
 on:
   push:
     branches:
-      - master
-    paths-ignore:
-      - notes.ttl
-      - README.md
+      - main
+  
   workflow_dispatch:
+
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
