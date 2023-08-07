@@ -1,5 +1,0 @@
-site_name: Fastly Websocket POC
-theme: material
-plugins:
-  - include-markdown
-docs_dir: docs
