@@ -25,7 +25,7 @@ The fastly service is deployed using terraform. The terraform script is `main.tf
 ```bash
 tfenv use
 terraform init
-op run -- terraform apply -auto-approve
+terraform apply -var "tld=jmoney.dev" -var "subdomain=echo" -var websocket_backend=$(curl --silent "http://127.0.0.1:4040/api/tunnels" | jq -r '.tunnels[] | select(.name == "websocket") | .public_url') -var request_backend=$(curl --silent "http://127.0.0.1:4040/api/tunnels" | jq -r '.tunnels[] | select(.name == "request") | .public_url') -auto-approve
 ```
 
 This does a terraform apply with the state generated locally.  `op run` is the 1password cli client which exposes a few environment variables used for authentication of the providers.  This is currently using cloudflare as the DNS provider and my personal TLD, `jmoney.dev`.  You will need to update the `main.tf` file to use your own DNS provider and TLD or remove entirely and manage your DNS outside the script.
@@ -40,8 +40,12 @@ This does a terraform apply with the state generated locally.  `op run` is the 1
 Once deployed you can run the following test to see this in action:
 
 ```bash
-curl --silent "https://echo.jmoney.dev"
-websocat "wss://echo.jmoney.dev"
+curl --silent "https://echo.jmoney.dev/http"
+websocat "wss://echo.jmoney.dev/websocket"
 ```
 
 After the first command you'll see an echoed response as well as some logging in the echo-server terminal tab.  After the second command, you'll need to type some text and hit enter and then you'll see the an echoed response as well as some logging in the echo-server terminal tab.  This shows that the websocket connection is being upgraded and the websocket server is receiving the message.
+
+## Demo
+
+![demo](./docs/media/FastlyWebsocketPOC.mp4)

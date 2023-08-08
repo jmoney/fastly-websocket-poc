@@ -15,21 +15,44 @@ provider "cloudflare" {}
 
 provider  "fastly" {}
 
+variable "tld" {
+  description = "The top level domain to use for the demo"
+}
+
+variable "subdomain" {
+  description = "The subdomain to use for the demo, ex: echo"
+}
+
+variable "websocket_backend" {
+  description = "The backend to use for websocket requests"
+}
+
+variable "request_backend" {
+  description = "The backend to use for non-websocket requests"
+}
+
 locals {
-  websocket_backend_addr = "https://b31a-70-121-110-22.ngrok-free.app"
-  nonwebsocket_backend_addr = "https://34b1-70-121-110-22.ngrok-free.app"
-  tld = "jmoney.dev"
+  echo_domains = [
+    "${var.subdomain}.${var.tld}",
+  ]
+
+  websocket_backend_domain = trimprefix(var.websocket_backend, "https://")
+  request_backend_domain = trimprefix(var.request_backend, "https://")
 }
 
 data "cloudflare_zone" "tld" {
-  name = local.tld
+  name = var.tld
 }
 
 resource "fastly_service_vcl" "echo" {
+
   name = "fastly-websocket-poc"
 
-  domain {
-    name    = cloudflare_record.echo.hostname
+  dynamic domain {
+    for_each = local.echo_domains
+    content {
+      name = domain.value
+    }
   }
 
   condition {
@@ -62,24 +85,24 @@ resource "fastly_service_vcl" "echo" {
 
   backend {
     name = "ws_backend"
-    address = local.websocket_backend_addr
+    address = var.websocket_backend
     request_condition = "websocket"
     ssl_check_cert = false
     port = 443
     use_ssl = true
-    ssl_sni_hostname = trimprefix(local.websocket_backend_addr, "https://")
-    override_host = trimprefix(local.websocket_backend_addr, "https://")
+    ssl_sni_hostname = local.websocket_backend_domain
+    override_host = local.websocket_backend_domain
   }
 
 backend {
     name = "non_ws_backend"
-    address = local.nonwebsocket_backend_addr
+    address = var.request_backend
     request_condition = "not_websocket"
     ssl_check_cert = false
     port = 443
     use_ssl = true
-    ssl_sni_hostname = trimprefix(local.nonwebsocket_backend_addr, "https://")
-    override_host = trimprefix(local.nonwebsocket_backend_addr, "https://")
+    ssl_sni_hostname = local.request_backend_domain
+    override_host = local.request_backend_domain
   }
 
   # This enables the websocket product feature as a trial. Need to contact support to enable it permanently on paid accounts
@@ -96,9 +119,36 @@ backend {
   force_destroy = true
 }
 
-resource "cloudflare_record" "echo" {
+resource "fastly_tls_subscription" "tls" {
+  domains               = [for domain in fastly_service_vcl.echo.domain : domain.name]
+  certificate_authority = "lets-encrypt"
+  force_destroy = true
+}
+
+resource "cloudflare_record" "tls" {
+  depends_on = [ fastly_tls_subscription.tls ]
+  for_each = {
+    for domain in fastly_tls_subscription.tls.domains : domain => element([
+      for obj in fastly_tls_subscription.tls.managed_dns_challenges : obj if obj.record_name == "_acme-challenge.${domain}"
+    ], 0)
+  }
   zone_id = data.cloudflare_zone.tld.id
-  name    = "echo"
+  name    = each.value.record_name
+  value   = each.value.record_value
+  type    = each.value.record_type
+  ttl     = 120
+}
+
+resource "fastly_tls_subscription_validation" "tls" {
+  subscription_id = fastly_tls_subscription.tls.id
+  depends_on      = [ cloudflare_record.tls ]
+}
+
+resource "cloudflare_record" "echo" {
+  for_each = toset(local.echo_domains)
+
+  zone_id = data.cloudflare_zone.tld.id
+  name    = each.value
   value   = "d.sni.global.fastly.net"
   type    = "CNAME"
 }
