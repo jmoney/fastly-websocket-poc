@@ -45,7 +45,3 @@ websocat "wss://echo.jmoney.dev/websocket"
 ```
 
 After the first command you'll see an echoed response as well as some logging in the echo-server terminal tab.  After the second command, you'll need to type some text and hit enter and then you'll see the an echoed response as well as some logging in the echo-server terminal tab.  This shows that the websocket connection is being upgraded and the websocket server is receiving the message.
-
-## Demo
-
-https://www.jmoney.dev/fastly-websocket-poc/media/FastlyWebsocketPOC.mp4
