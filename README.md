@@ -48,4 +48,4 @@ After the first command you'll see an echoed response as well as some logging in
 
 ## Demo
 
-![demo](https://www.jmoney.dev/fastly-websocket-poc/media/FastlyWebsocketPOC.mp4)
+https://www.jmoney.dev/fastly-websocket-poc/media/FastlyWebsocketPOC.mp4
