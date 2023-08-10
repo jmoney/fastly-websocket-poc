@@ -31,10 +31,17 @@ variable "request_backend" {
   description = "The backend to use for non-websocket requests"
 }
 
+variable "type" {
+  description = "The type of fastly service to deploy: vcl or compute"
+  default = "vcl"
+  validation {
+    condition = can(regex("vcl|compute", var.type))
+    error_message = "type must be either vcl or compute"
+  }
+}
+
 locals {
-  echo_domains = [
-    "${var.subdomain}.${var.tld}",
-  ]
+  echo_domain = "${var.subdomain}.${var.tld}"
 
   websocket_backend_domain = trimprefix(var.websocket_backend, "https://")
   request_backend_domain = trimprefix(var.request_backend, "https://")
@@ -45,14 +52,11 @@ data "cloudflare_zone" "tld" {
 }
 
 resource "fastly_service_vcl" "echo" {
-
+  count = (var.type == "vcl") ? 1 : 0
   name = "fastly-websocket-poc"
 
-  dynamic domain {
-    for_each = local.echo_domains
-    content {
-      name = domain.value
-    }
+  domain {
+    name = local.echo_domain
   }
 
   condition {
@@ -120,7 +124,7 @@ backend {
 }
 
 resource "fastly_tls_subscription" "tls" {
-  domains               = [for domain in fastly_service_vcl.echo.domain : domain.name]
+  domains               = [ local.echo_domain ]
   certificate_authority = "lets-encrypt"
   force_destroy = true
 }
@@ -145,10 +149,10 @@ resource "fastly_tls_subscription_validation" "tls" {
 }
 
 resource "cloudflare_record" "echo" {
-  for_each = toset(local.echo_domains)
+  depends_on = [ fastly_tls_subscription_validation.tls ]
 
   zone_id = data.cloudflare_zone.tld.id
-  name    = each.value
+  name    = var.subdomain
   value   = "d.sni.global.fastly.net"
   type    = "CNAME"
 }
