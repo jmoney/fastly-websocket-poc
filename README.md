@@ -23,9 +23,17 @@ This starts two echo servers on addresses `localhost:9001` and `localhost:9002`.
 The fastly service is deployed using terraform. The terraform script is `main.tf`. The main decision is which type of fastly service to deploy: vcl or compute.  If vcl is chose, then a deliver service managed by vcl will be deployed.  If compute is chose, then a compute serivice written in golang is to be deployed.  To deploy the service, run the following commands:
 
 ```bash
+# vcl based service
 tfenv use
 terraform init
-make apply-<type>
+make apply-vcl
+```
+
+```bash
+# compute based service
+tfenv use
+terraform init
+make apply-compute
 ```
 
 This does a terraform apply with the state generated locally. This is currently using cloudflare as the DNS provider.  Please set the `tld` terraform variable to tld you own and have access too in cloudflare.  Cloudflare was used for demo purposes it can be replaced with any DNS provider supported by terraform such as AWS Route53.
@@ -51,7 +59,15 @@ After the first command you'll see an echoed response as well as some logging in
 When testing is complete do not forget to tear it all down. To do so run the following command:
 
 ```bash
+# cleanup vcl based service
 tfenv use
 terraform init
-make destroy-<type>
+make destroy-vcl
+```
+
+```bash
+# cleanup compute based service
+tfenv use
+terraform init
+make destroy-compute
 ```
