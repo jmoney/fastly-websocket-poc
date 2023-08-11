@@ -53,7 +53,7 @@ data "cloudflare_zone" "tld" {
 
 resource "fastly_service_vcl" "echo" {
   count = (var.type == "vcl") ? 1 : 0
-  name = "fastly-websocket-poc"
+  name = "fastly-vcl-websocket-poc"
 
   domain {
     name = local.echo_domain
@@ -82,9 +82,9 @@ resource "fastly_service_vcl" "echo" {
   # The proper location for the websocker upgrade is AFTER the Fastly RECV macro that does the backend selection
   # Fastly does not have a way to do this, so we have to do it manually
   vcl {
-    name = "service"
+    name = "main"
     main = true
-    content = file("service.vcl")
+    content = file("vcl/main.vcl")
   }
 
   backend {
@@ -118,6 +118,48 @@ backend {
   cache_setting {
     name = "disable_caching"
     action = "pass"
+  }
+
+  force_destroy = true
+}
+
+data "fastly_package_hash" "echo" {
+  count = (var.type == "compute") ? 1 : 0
+
+  filename = "./pkg/compute.tar.gz"
+}
+
+resource "fastly_service_compute" "echo" {
+  count = (var.type == "compute") ? 1 : 0
+  name = "fastly-compute-websocket-poc"
+
+  domain {
+    name    = local.echo_domain
+  }
+
+  package {
+    filename         = "./pkg/compute.tar.gz"
+    source_code_hash = data.fastly_package_hash.echo[0].hash
+  }
+
+    backend {
+      name = "ws_backend"
+      address = var.websocket_backend
+      ssl_check_cert = false
+      port = 443
+      use_ssl = true
+      ssl_sni_hostname = local.websocket_backend_domain
+      override_host = local.websocket_backend_domain
+  }
+
+  backend {
+    name = "nonws_backend"
+    address = var.request_backend
+    ssl_check_cert = false
+    port = 443
+    use_ssl = true
+    ssl_sni_hostname = local.request_backend_domain
+    override_host = local.request_backend_domain
   }
 
   force_destroy = true

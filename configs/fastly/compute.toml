@@ -1,0 +1,5 @@
+authors = ["<jon.monette@gmail.com>"]
+description = "Testing websockets in golang"
+language = "go"
+manifest_version = 3
+name = "fastly-compute-websocket-poc"

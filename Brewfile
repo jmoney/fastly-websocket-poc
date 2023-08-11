@@ -3,6 +3,7 @@ tap "jmoney/server-utils"
 
 brew "terraform"
 brew "tfenv"
+brew "tinygo"
 brew "websocat"
 brew "jmoney/server-utils/echo-server"
 
