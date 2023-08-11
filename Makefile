@@ -38,3 +38,6 @@ plan-%: package init
 apply-%: package init
 	terraform apply -var "type=$*" -var "tld=jmoney.dev" -var "subdomain=echo" -var "websocket_backend=$(shell curl --silent "http://127.0.0.1:4040/api/tunnels" | jq -r '.tunnels[] | select(.name == "websocket") | .public_url')" -var "request_backend=$(shell curl --silent "http://127.0.0.1:4040/api/tunnels" | jq -r '.tunnels[] | select(.name == "request") | .public_url')" -auto-approve
 
+destroy-%:
+	terraform destroy -var "type=$*" -var "tld=jmoney.dev" -var "subdomain=echo" -var "websocket_backend=$(shell curl --silent "http://127.0.0.1:4040/api/tunnels" | jq -r '.tunnels[] | select(.name == "websocket") | .public_url')" -var "request_backend=$(shell curl --silent "http://127.0.0.1:4040/api/tunnels" | jq -r '.tunnels[] | select(.name == "request") | .public_url')" -auto-approve
+
