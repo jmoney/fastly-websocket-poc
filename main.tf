@@ -142,15 +142,15 @@ resource "fastly_service_compute" "echo" {
     source_code_hash = data.fastly_package_hash.echo[0].hash
   }
 
-    backend {
-      name = "ws_backend"
-      address = var.websocket_backend
-      ssl_check_cert = false
-      port = 443
-      use_ssl = true
-      ssl_sni_hostname = local.websocket_backend_domain
-      override_host = local.websocket_backend_domain
-  }
+  backend {
+    name = "ws_backend"
+    address = var.websocket_backend
+    ssl_check_cert = false
+    port = 443
+    use_ssl = true
+    ssl_sni_hostname = local.websocket_backend_domain
+    override_host = local.websocket_backend_domain
+}
 
   backend {
     name = "nonws_backend"
@@ -160,6 +160,10 @@ resource "fastly_service_compute" "echo" {
     use_ssl = true
     ssl_sni_hostname = local.request_backend_domain
     override_host = local.request_backend_domain
+  }
+
+  product_enablement {
+    websockets = true
   }
 
   force_destroy = true
