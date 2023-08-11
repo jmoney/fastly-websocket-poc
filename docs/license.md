@@ -1,3 +1,0 @@
-# License
-
-{% include-markdown '../LICENSE' %}
