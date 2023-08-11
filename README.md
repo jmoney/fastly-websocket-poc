@@ -20,16 +20,12 @@ echo-server --port 9002 --type websocket
 
 This starts two echo servers on addresses `localhost:9001` and `localhost:9002`.  The first is a simple http server that returns the request headers.  The second is a websocket server that echos back the message sent to it.
 
-The fastly service is deployed using terraform. The terraform script is `main.tf`. To deploy the service, run the following commands:
+The fastly service is deployed using terraform. The terraform script is `main.tf`. The main decision is which type of fastly service to deploy: vcl or compute.  If vcl is chose, then a deliver service managed by vcl will be deployed.  If compute is chose, then a compute serivice written in golang is to be deployed.  To deploy the service, run the following commands:
 
 ```bash
 tfenv use
 terraform init
-terraform apply -auto-approve \ 
-    -var "tld=jmoney.dev" \ 
-    -var "subdomain=echo" \ 
-    -var websocket_backend=$(curl --silent "http://127.0.0.1:4040/api/tunnels" | jq -r '.tunnels[] | select(.name == "websocket") | .public_url') \ 
-    -var request_backend=$(curl --silent "http://127.0.0.1:4040/api/tunnels" | jq -r '.tunnels[] | select(.name == "request") | .public_url')
+make apply-<type>
 ```
 
 This does a terraform apply with the state generated locally. This is currently using cloudflare as the DNS provider.  Please set the `tld` terraform variable to tld you own and have access too in cloudflare.  Cloudflare was used for demo purposes it can be replaced with any DNS provider supported by terraform such as AWS Route53.
@@ -57,9 +53,5 @@ When testing is complete do not forget to tear it all down. To do so run the fol
 ```bash
 tfenv use
 terraform init
-terraform destroy -auto-approve \ 
-    -var "tld=jmoney.dev" \ 
-    -var "subdomain=echo" \ 
-    -var websocket_backend=$(curl --silent "http://127.0.0.1:4040/api/tunnels" | jq -r '.tunnels[] | select(.name == "websocket") | .public_url') \ 
-    -var request_backend=$(curl --silent "http://127.0.0.1:4040/api/tunnels" | jq -r '.tunnels[] | select(.name == "request") | .public_url')
+make destroy-<type>
 ```
